@@ -46,7 +46,7 @@ class AuthTool:
         return res
 
     @classmethod
-    def get_user(cls, role):
+    def get_user(cls, roles):
         def real_decorator(method, **kwargs):
             @wraps(method)
             def wrapper(*args, **kwargs):
@@ -54,10 +54,13 @@ class AuthTool:
                 email = token_content.get('email')
                 if not email:
                     raise ValidationError(error_code=ErrorCode.INVALID_TOKEN)
-                member = User.query.filter_by(email=email).first()
-                if not member:
+                user = User.query.filter_by(email=email).first()
+                if not user:
                     raise ValidationError(error_code=ErrorCode.MEMBER_IS_NOT_EXIST)
-                return method(*args, **kwargs, member=member)
+                if roles:
+                    if user.role not in roles:
+                        raise ValidationError(error_code=ErrorCode.PERMISSION_DENIED)
+                return method(*args, **kwargs, user=user)
 
             return wrapper
 

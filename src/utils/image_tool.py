@@ -16,23 +16,22 @@ class ImageHandler:
 
     @classmethod
     def upload_product_images(cls, product_id, images):
-        image_name = list()
+        images_name = list()
         try:
-            count = 1
             for image in images:
                 decode_data = base64.b64decode(image.split(';base64,')[1])
                 buff = BytesIO(decode_data)
                 image_ = Image.open(buff)
                 uid = uuid.uuid4().time
-                filepath = f'{cls._PRODUCT_IMAGE_PATH}{product_id}_{count}.jpg'
+                image_name = f'{product_id}_{uid}'
+                filepath = f'{cls._PRODUCT_IMAGE_PATH}{image_name}.jpg'
                 image_ = image_.convert('RGB')
                 image_.save(filepath)
-                image_name.append(uid)
+                images_name.append(image_name)
         except Exception as e:
             raise ValidationError(error_code=ErrorCode.UPLOAD_IMAGE_ERROR,
                                   message='upload image error')
-
-        return image_name
+        return images_name
 
     @classmethod
     def download_image(cls, response, product_id):

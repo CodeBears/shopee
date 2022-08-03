@@ -1,8 +1,9 @@
 import logging
 
+import werkzeug
 from flask import jsonify
 from schema import SchemaError
-from werkzeug.exceptions import NotFound, ServiceUnavailable
+from werkzeug.exceptions import NotFound, ServiceUnavailable, MethodNotAllowed
 from app import app
 
 from utils.error_code import ErrorCode
@@ -10,8 +11,11 @@ from utils.error_code import ErrorCode
 
 def make_error_schema(message, error_code):
     _dict = {
-        'message': message,
-        'code': error_code,
+        'success': False,
+        'response': {
+            'error_message': message,
+            'error_code': error_code,
+        }
     }
     return _dict
 
@@ -44,7 +48,7 @@ def handle_validation_error(e):
         error_code=e.error_code
     )
     logging.exception(e.message)
-    return jsonify(_schema), e.code
+    return jsonify(_schema), 400
 
 
 @app.errorhandler(SchemaError)
@@ -55,7 +59,7 @@ def handle_schema_error(e):
         error_code=ErrorCode.PAYLOAD_ERROR
     )
     logging.exception(message)
-    return jsonify(_schema), e.code
+    return jsonify(_schema), 400
 
 
 ###############################
@@ -64,7 +68,7 @@ def handle_schema_error(e):
 
 @app.errorhandler(NotFound)
 def handle_404_error(e):
-    error_code = ErrorCode.INVALID_OPERATION
+    error_code = ErrorCode.ENDPOINT_NOT_FOUND
     message = 'endpoint not found'
     _schema = make_error_schema(
         message=message,
@@ -72,6 +76,18 @@ def handle_404_error(e):
     )
     logging.exception(message)
     return jsonify(_schema), 404
+
+
+@app.errorhandler(MethodNotAllowed)
+def handle_404_error(e):
+    error_code = ErrorCode.METHOD_NOT_ALLOWED
+    message = 'http method not allowed'
+    _schema = make_error_schema(
+        message=message,
+        error_code=error_code
+    )
+    logging.exception(message)
+    return jsonify(_schema), 405
 
 
 @app.errorhandler(ServiceUnavailable)

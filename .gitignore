@@ -6,11 +6,6 @@ src/static
 __pycache__/
 *.py[cod]
 
-# Environments
-.env
-env/
-ENV/
-
 # IDE
 **/.vscode/**
 **/.idea/**

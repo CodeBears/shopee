@@ -36,7 +36,8 @@ class Order(db.Model):
     name = db.Column(db.String(100), nullable=False, comment='名字')
     phone = db.Column(db.String(100), nullable=False, comment='電話')
     status = db.Column(db.Integer, server_default='1', nullable=False, comment='狀態')
-    payment = db.Column(db.Integer, server_default='1', nullable=False, comment='付款方式')
+    payment = db.Column(db.Integer, nullable=False, comment='付款方式')
+    delivery = db.Column(db.Integer, nullable=False, comment='運送方式')
     update_datetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now(),
                                 comment='更新時間')
     create_datetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), comment='建立時間')
@@ -84,6 +85,7 @@ class Product(db.Model):
     describe = db.Column(db.Text, nullable=False, comment='內文')
     product_type_id = db.Column(db.Integer, db.ForeignKey('product_type.id'), nullable=False)
     images_name = db.Column(MEDIUMTEXT, nullable=True, comment='圖片編號')
+    on_shelf = db.Column(db.Boolean, nullable=False, server_default='1', comment='上架')
     update_datetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now(),
                                 comment='更新時間')
     create_datetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), comment='建立時間')
@@ -100,6 +102,6 @@ class ProductDetail(db.Model):
     specifications = db.Column(db.String(100), nullable=False, comment='規格')
     price = db.Column(db.Integer, nullable=False, comment='價錢')
     stock = db.Column(db.Integer, nullable=False, server_default='0', comment='庫存')
+    create_datetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), comment='建立時間')
     update_datetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), onupdate=func.now(),
                                 comment='更新時間')
-    create_datetime = db.Column(db.DateTime, nullable=False, server_default=func.now(), comment='建立時間')

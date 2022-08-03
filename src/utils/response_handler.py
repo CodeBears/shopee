@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, make_response
 
 from utils.error_code import ErrorCode
 from utils.errors import ValidationError
@@ -6,12 +6,12 @@ from utils.errors import ValidationError
 
 class ResponseHandler:
     @staticmethod
-    def _validate_results(results):
-        if results is False:
+    def _validate_results(res):
+        if res is False:
             raise ValidationError(error_code=ErrorCode.INVALID_OPERATION)
-        if results is None:
+        if res is None:
             raise ValidationError(error_code=ErrorCode.DATA_MISSING)
-        if not (isinstance(results, dict) or isinstance(results, list)):
+        if not (isinstance(res, dict) or isinstance(res, list)):
             raise ValidationError(error_code=ErrorCode.DATA_ERROR)
 
     @staticmethod
@@ -23,19 +23,19 @@ class ResponseHandler:
             raise ValidationError(error_code=ErrorCode.DATA_ERROR)
 
     @classmethod
-    def to_json(cls, results, pager=None, code=200):
-        if results is True:
-            return jsonify({'succeed': True}), code
-        cls._validate_results(results=results)
+    def to_json(cls, data, pager=None, code=200):
+        if data is True:
+            return jsonify({'success': True}), code
+        cls._validate_results(res=data)
         cls._validate_pager(pager=pager)
-        data = {
+        res = {
             'success': True,
             'response': {
+                'data': data,
                 'pager': pager,
-                'data': results,
             }
         }
-        return jsonify(data), code
+        return jsonify(res), code
 
     @staticmethod
     def make_pager(page, per_page, obj):
@@ -46,3 +46,10 @@ class ResponseHandler:
             'pages': obj.pages,
         }
         return pager
+
+    @staticmethod
+    def make_csv_response(csv, filename):
+        response = make_response(csv)
+        response.minetype = 'text/csv'
+        response.headers['Content-disposition'] = f'attachment; filename={filename}.csv'
+        return response

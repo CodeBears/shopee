@@ -16,5 +16,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # JWT
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', None)
-    ACCESS_TOKEN_EXPIRE_TIME = 60 * 30  # 30分鐘
-    REFRESH_TOKEN_EXPIRE_TIME = 60 * 60 * 24 * 7  # 7天
+    ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 24 * 7  # 7天

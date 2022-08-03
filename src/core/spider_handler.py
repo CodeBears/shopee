@@ -4,9 +4,9 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 from app import db
-from const import ShopeeConst
 from core.beams_api import BeamsApi
 from orm.models import Product, ProductType, ProductDetail, User
+from utils.const import Const
 from utils.db_tool import DBTool
 from utils.image_tool import ImageHandler
 
@@ -78,14 +78,14 @@ class SpiderHandler:
     @staticmethod
     def _save_to_db(products):
         product_type = ProductType.query.filter(ProductType.name == '衣服').first()
-        user = User.query.filter(User.username == 'admin001', User.role == ShopeeConst.Role.ADMIN).first()
-
+        user = User.query.filter(User.username == 'member001', User.role == Const.Role.MEMBER).first()
         for product in tqdm(products, desc='save to db'):
             p = Product(
                 user_id=user.id,
                 name=product['name'],
                 describe=product['name'],
                 product_type_id=product_type.id,
+                on_shelf=True
             )
             db.session.add(p)
             DBTool.flush()
@@ -106,11 +106,12 @@ class SpiderHandler:
         for product in tqdm(products, desc=f'save image to db'):
             images_name = [f'{product.id}_1']
             product.images_name = json.dumps(images_name)
+        DBTool.commit()
 
     @classmethod
     def _save_image(cls, products):
         product_ids = []
-        for product in products:
+        for product in tqdm(products, desc=f'download image'):
             cls._download_image(url=product['img_url'], product_id=product['product_id'])
             product_ids.append(product['product_id'])
         return product_ids
