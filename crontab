@@ -1,0 +1,1 @@
+30 08 * * * root python3 /src/start_spider.py >> /var/log/cron.log
