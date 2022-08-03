@@ -158,8 +158,13 @@ class ProductHandler:
             max_per_page=Const.Page.MAX_PAGE,
         )
         res = []
+        product_ids = [product.id for product in products.items]
+        details = ProductDetail.query.filter(ProductDetail.id.in_(product_ids)).all()
+        detail_map = {}
+        for detail in details:
+            detail_map[detail.product_id] = detail
         for product in products.items:
-            detail = ProductDetail.query.filter_by(product_id=product.id).first()
+            detail = detail_map[product.id]
             data = {
                 'id': product.id,
                 'name': product.name,
@@ -309,3 +314,48 @@ class ProductHandler:
             'name': name,
         }
         return res
+
+    @classmethod
+    def get_order(cls, user_id, page, per_page):
+        orders = Order.query.filter(
+            Order.user_id == user_id
+        ).order_by(
+            Order.create_datetime.desc()
+        ).paginate(
+            page=page,
+            per_page=per_page,
+            max_per_page=Const.Page.MAX_PAGE,
+        )
+        order_ids = [order.id for order in orders.items]
+        order_details = OrderDetail.query.filter(OrderDetail.order_id.in_(order_ids)).all()
+        detail_map = {}
+        for detail in order_details:
+            tmp = detail_map.get(detail.order_id, [])
+            data = {
+                'id': detail.id,
+                'product_detail_id': detail.product_detail_id,
+                'product_price': detail.product_price,
+                'product_name': detail.product_name,
+                'quantity': detail.quantity,
+            }
+            tmp.append(data)
+            detail_map[detail.order_id] = tmp
+        res = []
+        for order in orders.items:
+            details = detail_map.get(order.id)
+            tmp = {
+                'id': order.id,
+                'user_id': order.user_id,
+                'address': order.address,
+                'name': order.name,
+                'phone': order.phone,
+                'status': order.status,
+                'payment': order.payment,
+                'delivery': order.delivery,
+                'create_datetime': order.create_datetime.strftime('%F %X'),
+                'order_details': details
+            }
+            res.append(tmp)
+
+        pager = ResponseHandler.make_pager(page=page, per_page=per_page, obj=orders)
+        return res, pager

@@ -128,6 +128,18 @@ def buy_product(user, payload):
     return ResponseHandler.to_json(data=res)
 
 
+@app.route('/order', methods=['GET'])
+@AuthTool.get_user([Const.Role.MEMBER])
+@DataValidator.validate()
+def get_order(user, payload):
+    res, pager = ProductHandler.get_order(
+        user_id=user.id,
+        page=int(payload.get('page', 1)),
+        per_page=int(payload.get('per_page', Const.Page.PER_PAGE)),
+    )
+    return ResponseHandler.to_json(data=res, pager=pager)
+
+
 @app.route('/admin/product-type', methods=['POST'])
 @AuthTool.get_user([Const.Role.ADMIN])
 @DataValidator.validate(schema=DataSchema.ADD_PRODUCT_TYPE)
