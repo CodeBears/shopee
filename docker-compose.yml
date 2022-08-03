@@ -42,4 +42,4 @@ services:
 networks:
   shopee-network:
     name: shopee
-    # driver: bridge
+    driver: bridge
