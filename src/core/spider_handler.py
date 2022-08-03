@@ -15,6 +15,7 @@ class SpiderHandler:
     @classmethod
     def start_spider(cls):
         products = cls._get_all_products()
+        products = cls._remove_exist_product(products=products)
         cls._save_to_db(products=products)
         product_ids = cls._save_image(products=products)
         cls._save_image_to_db(product_ids=product_ids)
@@ -58,9 +59,6 @@ class SpiderHandler:
                 'price': price,
                 'img_url': img_url
             }
-            product = Product.query.filter(Product.name == name).first()
-            if product:
-                continue
             res.append(tmp)
         return res
 
@@ -115,3 +113,11 @@ class SpiderHandler:
             cls._download_image(url=product['img_url'], product_id=product['product_id'])
             product_ids.append(product['product_id'])
         return product_ids
+
+    @classmethod
+    def _remove_exist_product(cls, products):
+        names = [product['name'] for product in products]
+        product_obj = Product.query.filter(Product.name.in_(names)).all()
+        obj_names = [product.name for product in product_obj]
+        res = [product for product in products if product['name'] not in obj_names]
+        return res
