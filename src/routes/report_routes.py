@@ -10,6 +10,9 @@ from utils.response_handler import ResponseHandler
 @AuthTool.get_user([Const.Role.ADMIN])
 @DataValidator.validate(DataSchema.TRANSACTION_REPORT)
 def transaction_report(user, payload):
+    """
+    取得交易量報表
+    """
     res = ReportHandler.get_transaction_report(
         start_date=payload.get('start_date'),
         end_date=payload.get('end_date'),
